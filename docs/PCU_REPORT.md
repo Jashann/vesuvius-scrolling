@@ -1,23 +1,35 @@
 # Certified automatic winding constraints from Lasagna predictions (PHerc. Paris 4)
 
 **One-line summary.** Treating Lasagna's `cos` channel as the real part of a wrapped winding phase
-lets us (1) count wraps between two points from three independent measurements, (2) certify the
-count only when they agree, and (3) generate relative-winding constraints automatically in the VC3D
-point-collection format the spiral fit already consumes. On all 1,443 human adjacent-wrap pairs of
-PHerc. Paris 4, certified counts are **99.62% correct at 70% coverage**, **100% correct in the densest
-bands** (wrap spacing under 173 um), and the same precision holds for automatically generated
-constraints (1,581 of 1,587 matched to human ladders) and on held-out calibration splits.
+lets us (1) count wraps between two points three ways from that one prediction, (2) certify the
+count only when they agree, add a fourth vote from an independent model (gold tier), and (3) generate
+relative-winding constraints automatically in the VC3D point-collection format the spiral fit already
+consumes. On all 1,502 human adjacent-wrap pairs of PHerc. Paris 4 (63 slices), certified counts are
+**99.62% correct at 70% coverage** (4 errors; base rate of the best single measurement 95.6%; 95%
+Wilson lower bound 99.0%), **100% correct in the densest bands** (wrap spacing under 173 um); the
+gold tier of automatically generated steps is **942 / 942** against human ladders (lower bound 99.6%),
+and the precision holds on held-out calibration splits (99.64%). In the organisers' spiral fitter the
+constraints cut winding slips per wrap from 20.3% to 9.3% on Paris 4 and from 50.1% to 36.4% on the
+eligible scroll PHerc0826 (section 2b).
 
-Why it matters: the team's stated bottleneck is "winding constraints that are precise and fast enough
-to use widely" (Winding Constraints open problem), and the community's winding-ruler study showed that
-constraints at ~93% accuracy make the spiral fit *worse* than none. Precision, not coverage, is what a
-global fit needs. These constraints run at ~6 s per slice on a laptop, with no annotation.
+Why it matters: the organisers' stated bottleneck is "winding constraints that are precise and fast
+enough to use widely" (Winding Constraints open problem), and their note on the community
+winding-ruler study is that constraints at roughly 93% accuracy make the spiral fit *worse* than none
+(that figure is theirs, measured differently, and is not directly comparable with the precision here).
+Precision, not coverage, is what a global fit needs. These constraints run at about 6 s per slice on a
+laptop, with no annotation.
+
+Terms: a *ladder* is a human-clicked line of points across consecutive wraps in one slice; an
+*adjacent pair* is two neighbouring ladder points (one wrap apart); *coverage* is the fraction of
+pairs the certificate accepts; *slips per wrap* (section 2b) is the fraction of adjacent pairs the
+fitted surfaces assign to the wrong wrap difference.
 
 ## 1. Idea
 
 A scroll cross-section is a fringe pattern: the "which wrap" coordinate `w` is a phase, and Lasagna
-already predicts `cos(2 pi w)`. Three measurements of "how many wraps between a and b" are then available,
-each failing in a different way:
+already predicts `cos(2 pi w)`. Three measurements of "how many wraps between a and b" can be read off
+the same prediction, each failing in a different way (they are not independent evidence: all three can
+agree on a sheet Lasagna missed, which is why the gold tier adds a vote from a different model):
 
 | Measurement | How | Typical failure |
 |---|---|---|
@@ -31,18 +43,23 @@ of that integer.
 ## 2. Results (PHerc. Paris 4, 2026 scan 20260411134726, Lasagna L2 predictions)
 
 Ground truth: `relative_windings.json` and `abs_winding.json` from the public spiral dataset
-(183 single-slice ladders, 63 slices, 1,443 adjacent pairs).
+(183 single-slice ladders, 63 slices, 1,502 adjacent pairs; `exp/e9_certificate.py`, log in
+`results/e9.log`, per-pair values in `results/e9_rows.json`).
 
-**Individual measurements** (adjacent pairs): local phase 95.6%, density 89.2%, whole-slice field 94.7%.
+**Individual measurements** (accuracy on all 1,502 adjacent pairs): local phase 95.6%, density 89.2%,
+whole-slice field 94.7%.
 
 **Certificate:**
 
-| Rule | Coverage | Precision | Errors |
-|---|---|---|---|
-| local = density | 88.5% | 98.27% | 23 |
-| local = density = field | 85.8% | 98.99% | 13 |
-| **all agree, near-integer** | **70.0%** | **99.62%** | **4** |
-| held-out calibration (20 random half splits by slice) | 69.5% | 99.64% (worst 99.24%) | |
+| Rule | Coverage | Precision | Errors | 95% Wilson lower bound |
+|---|---|---|---|---|
+| local = density | 88.5% | 98.27% | 23 | 97.4% |
+| local = density = field | 85.8% | 98.99% | 13 | 98.3% |
+| **all agree, near-integer** | **70.0%** | **99.62%** | **4** | **99.0%** |
+| held-out calibration (20 random half splits by slice) | 69.5% | 99.64% (worst 99.24%) | | |
+
+Figure `docs/fig/pcu_precision_coverage.png` traces precision against coverage as the near-integer
+tolerance is relaxed from 0.05 to 0.5.
 
 By wrap spacing (the dense regions are where constraints are needed most):
 
@@ -68,11 +85,41 @@ four votes: **942 / 942 correct** against human ladders (recto counted at 9.6 um
 steps the fourth vote rejects.
 
 **Throughput.** ~6 s per slice (L3, whole cross-section) on an Apple M5 laptop; one slice yields
-~700-1,000 ladders and ~2,000-3,000 certified adjacent pairs. Over 175 slices of PHerc. Paris 4 (L3 z 3200-8800, two slices per 64-slice block, about 2 h on a laptop): **377,437 gold (four-vote) and 581,323 silver (three-vote) certified adjacent-wrap pairs**, each merged into one relative-winding document the spiral fit can load next to its own `relative_windings.json` (`pcu_relative_windings_PHercParis4_gold.json.gz`, `..._silver.json.gz`).
+~700-1,000 ladders and ~2,000-3,000 certified adjacent pairs. Over 175 slices of PHerc. Paris 4 (L3 z 3200-8800, two slices per 64-slice block, about 2 h on a laptop): **377,437 gold (four-vote) certified adjacent-wrap pairs** (plus 581,323 silver, three-vote, not released), merged into one relative-winding document the spiral fit loads next to its own `relative_windings.json` (`pcu_relative_windings_PHercParis4_gold.json` on the GitHub release).
+
+## 2b. Use in the spiral fit
+
+Setup: the organisers' `fit_spiral.py` (villa `6bbe6e2`), PHerc. Paris 4 band z2 8400-9400, 12k steps on a Kaggle T4, *fully automatic* inputs only (tracks, Lasagna, umbilicus, outer shell; no verified patches, no human windings, no winding model), plus our gold constraints loaded as unattached relative-winding strips (`input_use_pcl_relative: true`). Scored by `exp/e31_eval_fit.py` on 32 human ladders held out of every fit (about 300 adjacent pairs per run) by point-to-surface winding assignment; slips per wrap = adjacent pairs assigned the wrong wrap difference.
+
+| Fit | Constraints | Strip weight (radius / dt) | Slips per wrap |
+|---|---|---|---|
+| A2 | none | | 20.3% |
+| B2 | PCU gold, default sampling | 2 / 2 (fit default) | 14.6% |
+| B3w4 | PCU gold, 10x sampling | 4 / 20 | 17.3% |
+| **B3w10** | PCU gold, 10x sampling | **10 / 20** | **9.3%** (30 / 324; 95% CI 6.6 to 12.9%) |
+| B3w20 | PCU gold, 10x sampling | 20 / 20 | 10.3% |
+| B3w40 | PCU gold, 10x sampling | 40 / 20 | 21.8% |
+
+The constraint weight is a real lever with an optimum near 10; too high and the fit follows every constraint strip at the expense of the tracks. Fits that also used the organisers' verified patches: A 15.9% without, B 15.6% with the constraints (no change: patches already pin those wraps). With human windings (not held out) the fit reaches 3.0%. Absolute-winding ladders: A2 4/7, B2 5/5, B3w10 8/8 on the modal offset. Jobs: `kaggle/pcu-fit-auto/` (A2, B2), `kaggle/pcu-fit-b3/` (B3); the fit's own satisfaction metrics are in `results/fit/`.
+
+**Gold-ladder metric for scrolls without human ladders** (`exp/e43_eval_gold.py`): PCU gold ladders from slices held out of the fit serve as ground truth. Calibration on Paris 4 against the human-ladder metric: A2 26.7% / B2 26.1% (harsher, and it discriminates weakly, so treat eligible-scroll numbers as relative).
+
+**PHerc0826 (eligible scroll), band z 8500-9500**, scored on 8 gold slices never given to any fit (`data/gold/gold0826_heldout8.json`, 3,426 ladders):
+
+| Fit | Constraints | Slips per wrap | Unassigned ladder points |
+|---|---|---|---|
+| A0 | none | 50.1% | 2,017 |
+| B0 | gold v1, default weight | 44.9% | |
+| B1w10 | gold v2, 10x sampling, weight 10 | 39.0% | |
+| **B1w20** | gold v2, 10x sampling, weight 20 | **36.4%** | 1,425 |
+| C1 | as B1w20 plus our outer shell | 36.5% | |
+
+A 27% relative reduction, and the surfaces cover more sheets (fewer unassigned points). The eligible-scroll fit remains far worse than Paris 4 (9 to 20%): sheet placement, not winding labels, is the remaining problem there (the fitted surfaces sit 2 to 8 voxels off the sheet, which `pcu/refine.py` corrects after the fit).
 
 ## 3. Whole-slice automatic winding fields (secondary result)
 
-Automatic, annotation-free winding numbers for entire cross-sections, scored on all 182 ladders:
+Automatic, annotation-free winding numbers for entire cross-sections, scored on the 182 ladders with
+at least two points inside the unwrapped field:
 
 | Unwrapper | Slips per wrap crossed | Ladders reproduced exactly |
 |---|---|---|
@@ -129,8 +176,8 @@ nearest-point pairs between wraps w and w+1 (and w+2 as negatives), three slices
 ## 6. Annotation audit
 
 13 human relative-winding pairs where the local phase count and the density integral agree tightly with
-each other (both say 2 wraps) but the label says 1 (`annotation_audit.json`, gallery
-`annotation_audit.png`). In several the CT shows two distinct sheets between the clicked points (likely
+each other (both say 2 wraps) but the label says 1 (`results/annotation_audit.json`, gallery
+`results/annotation_audit.png`). In several the CT shows two distinct sheets between the clicked points (likely
 skipped wraps); others are single thick sheets whose plies separated. Each is worth a quick look,
 because a wrong relative-winding label pulls the whole spiral fit.
 
@@ -146,14 +193,19 @@ because a wrong relative-winding label pulls the whole spiral fit.
 ## 8. How to run
 
 ```
-python exp/e11_generate.py <z_L3> 48        # certified ladders for one slice -> runs/constraints/*.json
-python exp/e13_band.py <z_lo> <z_hi> 2       # a z-band
-python exp/e9_certificate.py                 # precision/coverage on human ladders
-python exp/e12_validate_generated.py         # independent validation of generated steps
+python exp/e11_generate.py <z_L3> 48                    # certified ladders for one slice -> runs/constraints/pcu_z2_<z>.json
+OUT=runs/constraints python exp/e13_band.py <z_lo> <z_hi> 2   # a z-band -> pcu_z2_<z>_gold.json and _silver.json
+python exp/e9_certificate.py                             # precision / coverage on the human ladders (results/e9.log)
+python exp/e12_validate_generated.py                     # independent validation of generated steps
+python exp/e63_merge_gold.py out.json 'runs/constraints/*_gold.json'   # merge into one document for fit_spiral
+python exp/e31_eval_fit.py ...                           # slips per wrap of a fit on held-out human ladders
+python exp/e43_eval_gold.py ...                          # the same with PCU gold ladders (scrolls without human ladders)
 ```
+
+Lasagna predictions are read from the organisers' bucket; `exp/e13_band.py` defaults to `OUT=runs/constraints_tiered`. The audit gallery is `results/annotation_audit.png` with `results/annotation_audit.json`.
 
 Code: `pcu/phase.py` (Riesz phase, double-cover residues), `pcu/slice2d.py` (Laplace orientation, Fried
 split), `pcu/mcfcut.py` (min-cost-flow branch cuts, cut-avoiding integration), `pcu/constraints.py`
-(certificate, generator, VC3D JSON), `pcu/lasagna_run.py` (local Lasagna inference on MPS).
+(certificate, generator, VC3D JSON), `pcu/crestgraph.py` (section 4).
 
-Data: Vesuvius Challenge open data (CC BY-NC 4.0). Lasagna model: scrollprize/lasagna (MIT).
+Data: Vesuvius Challenge open data. Lasagna and recto-surface models: the organisers' (scrollprize). Constraint files derived from the data: CC BY-NC-SA 4.0.

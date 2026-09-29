@@ -1,0 +1,22 @@
+# Python 3.12. Install torch for your platform first (https://pytorch.org), then: pip install -r requirements.txt
+numpy>=1.26
+scipy>=1.11
+zarr==2.18.7
+numcodecs==0.15.1
+requests
+fsspec
+aiohttp
+tifffile
+imagecodecs
+imageio
+opencv-python-headless
+scikit-image
+networkx
+matplotlib
+einops
+timm
+pyyaml
+tqdm
+# organisers' code, cloned next to this repo (see README "Setup"):
+#   ext/villa-ink/ink-detection  (koine_machines, branch merge-ink-pipelines)
+#   ext/villa/vesuvius/src       (vesuvius.image_proc)

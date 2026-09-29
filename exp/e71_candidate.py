@@ -17,7 +17,7 @@ dev = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_a
 CK = {"base": "data/models/ink_9um/seed42_step075000.pth", "sA": "runs/kaggle/pcu-trace-train/sA_best.pth",
       "sB": "runs/kaggle/pcu-trace-train/sB_best.pth", "v2A": "runs/modal_v2/v2A_best.pth"}
 nets = {k: build_repo_training_model_bundle(torch.load(p, map_location="cpu", weights_only=False), p).model.to(dev).eval()
-        for k, p in CK.items()}
+        for k, p in CK.items() if os.path.exists(p)}  # missing checkpoints are skipped
 fg = np.load(gpath)["grid"]
 fg = fg[:, :, c0 // 5:c1 // 5 + 1]
 S = data.SCROLLS[sc]

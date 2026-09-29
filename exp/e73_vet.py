@@ -17,7 +17,7 @@ dev = "cuda" if torch.cuda.is_available() else "cpu"
 CK = {"sA": "runs/kaggle/pcu-trace-train/sA_best.pth", "sB": "runs/kaggle/pcu-trace-train/sB_best.pth",
       "v2A": "runs/modal_v2/v2A_best.pth"}
 nets = {k: build_repo_training_model_bundle(torch.load(p, map_location="cpu", weights_only=False), p).model.to(dev).eval()
-        for k, p in CK.items()}
+        for k, p in CK.items() if os.path.exists(p)}  # missing checkpoints are skipped
 G = np.load(gpath)
 S = data.SCROLLS[sc]
 vol = data.open_array(S["vol"] + "/0"); surf = data.open_array(S["surf"] + "/0")
