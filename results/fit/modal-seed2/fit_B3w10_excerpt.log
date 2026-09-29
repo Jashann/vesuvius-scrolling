@@ -1,0 +1,16 @@
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+  unattached sampling groups: relative_windings: 62260
+step 11800: loss = 113.4, umbilicus = 0.0, sym_dirichlet = 11.2, dense_normals = 2.7, min_spacing = 0.0, unattached_pcl_radius = 2.2, unattached_pcl_dt = 0.0, track_radius = 96.9, track_dt = 0.0, shell_outer = 0.3
+patch satisfaction: 0 patches, 0 quad centers, 0 forward + 0 inverse batches, 0.00s
+satisfied_patches = 0/0 (0.0%)
+satisfied_patches_area_weighted = 0.0/0.0 (0.0%)
+boundary_satisfied_patches = 0/0 (0.0%)
+satisfied_area = 0.0/0.0 (0.0%)
+satisfied_unattached_pcls = 27978/62260 (44.9%)
+satisfied_unattached_pcl_points = 97080/183023 (53.0%)
+satisfied_tracks = 305656/1429850 (21.4%)
+satisfied_track_points = 40294074/70900763 (56.8%)
+save_mesh fitted: winding range [10, 130)
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s

@@ -32,6 +32,9 @@ def test_fit_numbers():
     assert p4["B3w10"]["slips"] == 30 and p4["B3w10"]["pairs"] == 324
     assert p4["B3w10"]["ci95"][1] < p4["A2"]["ci95"][0], "B3w10 and A2 intervals must not overlap"
     assert p4["selection_free"]["held_out_rate_mean"] < 0.12
+    s2 = json.load(open(f"{ROOT}/results/fit/e31b_paris4_seed2_bootstrap.json"))
+    assert s2["A2_s2"]["slips"] == 66 and s2["B3w10_s2"]["slips"] == 30 and s2["B3w10_s2"]["pairs"] == 339
+    assert s2["B3w10_s2"]["ci95"][1] < s2["A2_s2"]["ci95"][0]
     s = json.load(open(f"{ROOT}/results/fit/e31b_pherc0826_bootstrap.json"))
     assert abs(s["A0"]["rate"] - 0.501) < 0.002 and abs(s["B1w20"]["rate"] - 0.363) < 0.002
 

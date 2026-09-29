@@ -14,7 +14,7 @@ All coordinates are in the organisers' volume frame of the named scan; JSON poin
 
 The gold v1 file of fit B0 (13,858 ladders, an earlier generator version on the same slices) is superseded by v2 and not shipped.
 
-On the GitHub release v1.0: `pcu_relative_windings_PHercParis4_gold.json` (Paris 4, scan 20260411134726, level 2, 175 slices, 165,227 ladders / 377,437 gold pairs; SHA256 `c632b2fcc8d77d5d121e42b1d1062d1115cb8b6e78f90f754f5825c0f620aa72`; the Paris 4 fits used its z2 8400 to 9400 subset, 62,260 ladders) and `pcu_gold_0125.json` (PHerc0125, band z 10000 to 10992, 55,458 ladders; SHA256 `7639f681fcea873551465f90d53e484358c747f6ec76221564bc9de7ae59ddd0`).
+On the GitHub release v1.0: `pcu_relative_windings_PHercParis4_gold.json` (Paris 4, scan 20260411134726, level 2, 175 slices two per 64, 165,227 ladders / 377,437 gold pairs; SHA256 `c632b2fcc8d77d5d121e42b1d1062d1115cb8b6e78f90f754f5825c0f620aa72`; the Paris 4 fits used the denser band file on release v1.1, below) and `pcu_gold_0125.json` (PHerc0125, band z 10000 to 10992, 55,458 ladders; SHA256 `7639f681fcea873551465f90d53e484358c747f6ec76221564bc9de7ae59ddd0`).
 
 On release v1.1: the spiral-fit output grids (one `wNNN` array of shape (3, rows, cols) per winding, level-2 xyz), scored by `exp/e31b_bootstrap.py`, and the Paris 4 fit input. SHA256:
 
@@ -34,7 +34,8 @@ On release v1.1: the spiral-fit output grids (one `wNNN` array of shape (3, rows
 | `grids_PHerc0826_B1w20.npz` | `594b1417912cc688a13bf57cff7ebe7c4c2f11741fd7f1d78a41c4ce896cdcfd` |
 | `grids_PHerc0826_C0.npz` | `dc066ab0eafecd1e570a2bf7c1ac5d409951a76e9d10c9890aeb68303d83c4a9` |
 | `grids_PHerc0826_C1.npz` | `3b3efba6c49ad4c46d25a0b5cd7d7ce5dcdfd7d58a1b2c5c9be75dd4d2d5f2d8` |
-| `pcu_gold_Paris4_z8400_9400_fit_input.json` (62,260 ladders, the z2 8400 to 9400 subset of the Paris 4 gold file, as loaded by the Paris 4 fit jobs) | `8aa44a98a2a8af7aa396b13060e7ac61d1496f5b1ddfe4b8934d000743fa971b` |
+| `grids_Paris4_A2_seed2.npz`, `grids_Paris4_B3w10_seed2.npz` (second-seed replication, `modal/fit_p4.py`) | see `results/release_v1.1_sha256.txt` |
+| `pcu_gold_Paris4_z8400_9400_fit_input.json` (62,260 ladders on 63 slices, one every 16 level-2 slices from z 8400, the dense band file the Paris 4 fit jobs loaded; same generator as the whole-scroll file, which has two slices per 64) | `8aa44a98a2a8af7aa396b13060e7ac61d1496f5b1ddfe4b8934d000743fa971b` |
 
 (The Paris 4 fit C grid, human windings as input, is `grids_Paris4_C.npz` if present; it is scored in the report for reference only.)
 
