@@ -1,7 +1,6 @@
-# PCU fully-automatic experiment (no verified patches, no human windings, no winding model): tracks + lasagna + umbilicus + shell; B2 adds PCU gold
 # PCU experiment: does the ScrollPrize spiral fit need human winding annotations if it gets
 # certified automatic constraints instead?  PHerc Paris 4, z (level-2) band [Z0, Z1).
-#   A: no human winding annotations, no winding-model inference (automatic inputs only; the verified-patch variant is kaggle/pcu-fit-b)
+#   A: no human winding annotations, no winding-model inference (automatic inputs + verified patches)
 #   B: A + PCU gold constraints as the relative-winding document
 #   C: default inputs (human relative/absolute/same-winding annotations + winding inference)
 # Score: slips per wrap along human relative-winding ladders in the band (held out for A and B).
@@ -85,6 +84,28 @@ wi = [(f"{DL}/winding_inference/{s['name']}/{a['file']}", f"{D}/winding_inferenc
 wi += [(f"{DL}/winding_inference/{s['name']}/manifest.json", f"{D}/winding_inference/{s['name']}/manifest.json") for s in m["shards"]]
 with ThreadPoolExecutor(16) as ex:
     list(ex.map(lambda a: get(*a), wi))
+# verified patches overlapping the band (meta first)
+idx = sess.get(f"{DL}/verified_patches/", timeout=600).text
+names = [n for n in re.findall(r'href="([^"]+/)"', idx) if not n.startswith("..")]
+print("patches listed", len(names), f"{time.time()-T0:.0f}s", flush=True)
+def meta(n):
+    p = f"{D}/verified_patches/{n}meta.json"
+    if not get(f"{DL}/verified_patches/{n}meta.json", p):
+        return n, None
+    try:
+        return n, json.load(open(p))
+    except Exception:
+        return n, None
+with ThreadPoolExecutor(64) as ex:
+    metas = dict(ex.map(meta, names))
+keep = [n for n, mm in metas.items() if mm and mm["bbox"][0][2] < Z1 + 200 and mm["bbox"][1][2] > Z0 - 200]
+drop = [n for n in names if n not in set(keep)]
+for n in drop:
+    shutil.rmtree(f"{D}/verified_patches/{n}", ignore_errors=True)
+print("patches kept", len(keep), f"{time.time()-T0:.0f}s", flush=True)
+jobs = [(f"{DL}/verified_patches/{n}{a}", f"{D}/verified_patches/{n}{a}") for n in keep for a in ("x.tif", "y.tif", "z.tif", "generations.tif")]
+with ThreadPoolExecutor(64) as ex:
+    list(ex.map(lambda a: get(*a), jobs))
 # automatic surface-prediction tracks (skeletonised m-prediction), packed store + dbm + crossings
 TB = f"{DL}/tracks/2um_ds2_ps256_surf_v2.dbm"
 tj = [(f"{TB}.db", f"{D}/tracks/2um_ds2_ps256_surf_v2.dbm.db"), (f"{TB}.crossings.npz", f"{D}/tracks/2um_ds2_ps256_surf_v2.dbm.crossings.npz")]
@@ -92,7 +113,6 @@ tj += [(f"{TB}.vctracks/{f}", f"{D}/tracks/2um_ds2_ps256_surf_v2.dbm.vctracks/{f
        ("arclengths.f64", "coordinates.i32", "family_codes.i8", "header.bin", "metadata.json", "offsets.i64", "source_ids.u64", "tortuosities.f64", "z_bounds.i32")]
 with ThreadPoolExecutor(6) as ex:
     print("tracks downloads", list(ex.map(lambda a: get(*a), tj)), f"{time.time()-T0:.0f}s", flush=True)
-os.makedirs(f"{D}/verified_patches", exist_ok=True)
 print("data ready", f"{time.time()-T0:.0f}s", flush=True)
 sh(f"du -sh {D}; df -h /tmp | tail -1")
 
@@ -102,6 +122,7 @@ print("gold source", gold_src, flush=True)
 gold = json.load(open(gold_src[0]))
 gold["collections"] = {k: c for k, c in gold["collections"].items()
                        if all(Z0 <= p["p"][2] < Z1 for p in c["points"].values())}
+gold["vc_pointcollections_json_version"] = "1"
 print("gold ladders in band", len(gold["collections"]), flush=True)
 
 
@@ -127,11 +148,13 @@ def variant(name, rel_doc=None):
 
 common = {"z_begin": Z0, "z_end": Z1, "optimizer_num_training_steps": STEPS,
           "input_use_fibers": False, "input_use_pcl_drawn_control_points": False,
-          "input_use_tracks": True, "input_use_fiber_directions": False, "input_use_verified_patches": False,
-          "input_use_winding_inference": False, "input_use_pcl_absolute": False, "input_use_pcl_same_winding": False}
+          "input_use_tracks": False, "input_use_fiber_directions": False}
+auto = dict(common, input_use_tracks=True, input_use_verified_patches=False)
 runs = {
-    "A2": (variant("A2"), dict(common, input_use_pcl_relative=False)),
-    "B2": (variant("B2", gold), dict(common, input_use_pcl_relative=True)),
+    "B": (variant("B", gold), dict(common, input_use_pcl_relative=True, input_use_pcl_absolute=False,
+                                       input_use_pcl_same_winding=False, input_use_winding_inference=False)),
+    "B2": (variant("B2", gold), dict(auto, input_use_pcl_relative=True, input_use_pcl_absolute=False,
+                                         input_use_pcl_same_winding=False, input_use_winding_inference=False)),
 }
 
 
@@ -145,7 +168,7 @@ def launch(name, gpu):
                             shell=True, stdout=open(f"{W}/fit_{name}.log", "w"), stderr=subprocess.STDOUT)
 
 
-order = ["A2,B2"]
+order = ["B,B2"]
 for group in order:
     procs = {n: launch(n, i) for i, n in enumerate(group.split(","))}
     for n, p in procs.items():

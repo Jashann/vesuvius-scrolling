@@ -1,6 +1,6 @@
 """TRACE v3 on Modal: v2 data + coarse-protocol fragment pairs (0009B, 343P at 8.64 um; 0500P2 at 9.362 um): native coarse distillation of ink_9um with all 56 real 9.362 um segments (PHerc0139/0814),
 held out PHerc0841 x3 + PHerc0139 w043. Reuses kaggle/pcu-trace-train/pcu_trace_train.py (prepare/train).
-Run: MODAL_PROFILE=<profile> modal run modal/trace_train.py"""
+Run: MODAL_PROFILE=<profile> modal run modal/trace_v3.py"""
 import os
 import modal
 

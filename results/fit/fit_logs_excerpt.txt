@@ -1,0 +1,65 @@
+== pcu-fit-auto/fit_A2
+  sample_count_unattached_pcls_per_step=9
+pcls: 0 cross-patch, 0 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-auto/fit_B2
+  sample_count_unattached_pcls_per_step=9
+Error: Unsupported JSON version in /tmp/ds_B2/relative_windings.json
+pcls: 0 cross-patch, 0 unattached
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-b/fit_B2
+  sample_count_unattached_pcls_per_step=9
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-b/fit_B
+  sample_count_unattached_pcls_per_step=9
+pcls: 28949 cross-patch, 48503 unattached
+  cross-patch sampling groups: relative_windings: 28949
+splice rasterization: 4,449,406 eligible quads, 4,931,459 transformed unique vertices in 272 batches, 3.52s
+== pcu-fit-b3/fit_B3w10
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-b3/fit_B3w40
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-b4/fit_B4w4
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-fit-b4/fit_B4w20
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 62260 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-0826/fit_A0
+  sample_count_unattached_pcls_per_step=9
+pcls: 0 cross-patch, 0 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-0826/fit_B0
+  sample_count_unattached_pcls_per_step=9
+pcls: 0 cross-patch, 13858 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-0826bb/fit_B1w10
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 25771 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-0826bb/fit_B1w20
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 25771 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s
+== pcu-0826c/fit_C1
+  sample_count_unattached_pcls_per_step=88
+pcls: 0 cross-patch, 25771 unattached
+  cross-patch sampling groups: 
+splice rasterization: 0 eligible quads, 0 vertex batches, 0.00s

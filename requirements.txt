@@ -6,9 +6,11 @@ numcodecs==0.15.1
 requests
 fsspec
 aiohttp
+s3fs
 tifffile
 imagecodecs
 imageio
+Pillow
 opencv-python-headless
 scikit-image
 networkx
@@ -17,6 +19,7 @@ einops
 timm
 pyyaml
 tqdm
-# organisers' code, cloned next to this repo (see README "Setup"):
-#   ext/villa-ink/ink-detection  (koine_machines, branch merge-ink-pipelines)
-#   ext/villa/vesuvius/src       (vesuvius.image_proc)
+pynrrd          # imported by the organisers' vesuvius package on import
+# organisers' code, cloned next to this repo at the pinned commits (see README "Setup"):
+#   ext/villa-ink/ink-detection  (koine_machines, branch merge-ink-pipelines, commit 3ea17f5)
+#   ext/villa/vesuvius/src       (vesuvius.image_proc, commit 6bbe6e2)

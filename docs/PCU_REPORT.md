@@ -9,8 +9,9 @@ consumes. On all 1,502 human adjacent-wrap pairs of PHerc. Paris 4 (63 slices), 
 Wilson lower bound 99.0%), **100% correct in the densest bands** (wrap spacing under 173 um); the
 gold tier of automatically generated steps is **942 / 942** against human ladders (lower bound 99.6%),
 and the precision holds on held-out calibration splits (99.64%). In the organisers' spiral fitter the
-constraints cut winding slips per wrap from 20.3% to 9.3% on Paris 4 and from 50.1% to 36.4% on the
-eligible scroll PHerc0826 (section 2b).
+constraints cut winding slips per wrap from 20.3% to 9.3% on Paris 4 (held-out human ladders, ladder-level
+bootstrap CI 6.2 to 12.7%, selection-free 10.2%) and from 50.1% to 36.3% on the eligible scroll PHerc0826
+measured against PCU's own gold ladders on held-out slices (section 2b).
 
 Why it matters: the organisers' stated bottleneck is "winding constraints that are precise and fast
 enough to use widely" (Winding Constraints open problem), and their note on the community
@@ -59,7 +60,18 @@ whole-slice field 94.7%.
 | held-out calibration (20 random half splits by slice) | 69.5% | 99.64% (worst 99.24%) | | |
 
 Figure `docs/fig/pcu_precision_coverage.png` traces precision against coverage as the near-integer
-tolerance is relaxed from 0.05 to 0.5.
+tolerance is swept from 0.05 to 0.5 (density tolerance 1.2x the local one), with the operating point
+(0.25 / 0.30, used everywhere in this report) marked. The tolerances were chosen on these same pairs; the
+20 half-split calibration above is the guard against that.
+
+**What this test cannot see.** Every human adjacent pair is a true one-wrap pair (`dw` = 1 for all 1,502), so
+the test measures how often the certificate says 2 (or 0) where the truth is 1. It cannot measure the error
+that hurts a spiral fit most, certifying "1 wrap" across a sheet Lasagna missed, because no two-wrap pairs are
+in it (a constant "1" predictor would score 100% here, which is why the 95.6% base rate above is only a
+partial yardstick). `exp/e9b_negative.py` runs the same certificate on the (i, i+2) and (i, i+3) pairs of the
+same ladders and reports how many are accepted and, of those, how many are certified as 1; its output is
+`results/e9b.log` (added when the run completes). The one measurement of this failure so far is on
+PHerc0139 (section 5): 5 to 8% of truly two-wrap pairs certified as one.
 
 By wrap spacing (the dense regions are where constraints are needed most):
 
@@ -80,41 +92,43 @@ certificate 128/148 = 86.5% (the certificate is doing the work).
 can agree on the same mistake (a consistently missed sheet). A fourth vote from a different model, the
 recto-surface nnU-Net, counts recto surfaces on the step (both ends shifted 1.5 L3 px along the step,
 since the recto surface sits 0 to 1 px outward of the Lasagna crest). Generated steps that pass all
-four votes: **942 / 942 correct** against human ladders (recto counted at 9.6 um; 1,047 / 1,047 at
-4.8 um), 95% lower confidence bound about 99.6%. Every error of the three-vote tier falls in the
-steps the fourth vote rejects.
+four votes: **942 / 942 correct** against human ladders (recto counted at 9.6 um, the setting used for
+the released files; 1,047 / 1,047 when counted at 4.8 um), 95% lower confidence bound 99.6%. The gold tier
+keeps 59% of the certified steps (942 of 1,587; 66% at 4.8 um); every error of the three-vote tier falls in
+the steps the fourth vote rejects. `exp/e12_validate_generated.py` seeds the generator at human ladder
+points to make the matching exact, which is an easier seeding than the release generator's crest seeding.
 
 **Throughput.** ~6 s per slice (L3, whole cross-section) on an Apple M5 laptop; one slice yields
 ~700-1,000 ladders and ~2,000-3,000 certified adjacent pairs. Over 175 slices of PHerc. Paris 4 (L3 z 3200-8800, two slices per 64-slice block, about 2 h on a laptop): **377,437 gold (four-vote) certified adjacent-wrap pairs** (plus 581,323 silver, three-vote, not released), merged into one relative-winding document the spiral fit loads next to its own `relative_windings.json` (`pcu_relative_windings_PHercParis4_gold.json` on the GitHub release).
 
 ## 2b. Use in the spiral fit
 
-Setup: the organisers' `fit_spiral.py` (villa `6bbe6e2`), PHerc. Paris 4 band z2 8400-9400, 12k steps on a Kaggle T4, *fully automatic* inputs only (tracks, Lasagna, umbilicus, outer shell; no verified patches, no human windings, no winding model), plus our gold constraints loaded as unattached relative-winding strips (`input_use_pcl_relative: true`). Scored by `exp/e31_eval_fit.py` on 32 human ladders held out of every fit (about 300 adjacent pairs per run) by point-to-surface winding assignment; slips per wrap = adjacent pairs assigned the wrong wrap difference.
+Setup: the organisers' `fit_spiral.py` (villa `6bbe6e2`), PHerc. Paris 4 band z2 8400-9400, 12k steps on a Kaggle T4, *fully automatic* inputs only (tracks, Lasagna, umbilicus, outer shell; no verified patches, no human windings, no winding model), plus our gold constraints (the z2 8400-9400 subset of the released Paris 4 file, 62,260 ladders) loaded as unattached relative-winding strips (`input_use_pcl_relative: true`). One run (seed) per setting. Scored by `exp/e31b_bootstrap.py` (same assignment as `exp/e31_eval_fit.py`: each ladder point gets the winding whose fitted surface passes closest) on 32 human ladders held out of every fit, about 300 adjacent pairs per run (pairs whose point is more than 10 voxels from every surface are unassigned and not counted). CIs are 95% ladder-level bootstraps; the paired difference resamples the same ladders for both fits. Results file: `results/fit/e31b_paris4_bootstrap.json`; the grids are on release v1.1.
 
-| Fit | Constraints | Strip weight (radius / dt) | Slips per wrap |
-|---|---|---|---|
-| A2 | none | | 20.3% |
-| B2 | PCU gold, default sampling | 2 / 2 (fit default) | 14.6% |
-| B3w4 | PCU gold, 10x sampling | 4 / 20 | 17.3% |
-| **B3w10** | PCU gold, 10x sampling | **10 / 20** | **9.3%** (30 / 324; 95% CI 6.6 to 12.9%) |
-| B3w20 | PCU gold, 10x sampling | 20 / 20 | 10.3% |
-| B3w40 | PCU gold, 10x sampling | 40 / 20 | 21.8% |
+| Fit | Constraints | Strip weight (radius / dt) | Slips per wrap (CI) | Paired difference vs A2 | Strips satisfied |
+|---|---|---|---|---|---|
+| A2 | none | | 20.3% (17.0 to 24.9), 59 / 291 | | |
+| B2 | PCU gold, default sampling | 2 / 2 (fit default) | 14.6% (11.5 to 18.4), 44 / 302 | -5.7 points (-10.4 to -2.0) | 23% |
+| B4w4 | PCU gold, 10x sampling | 4 / 4 | 17.3% (13.9 to 21.0), 47 / 271 | -2.9 (-7.8 to +0.7) | 36% |
+| **B3w10** | PCU gold, 10x sampling | **10 / 10** | **9.3%** (6.2 to 12.7), 30 / 324 | **-11.0 (-15.8 to -7.2)** | 45% |
+| B4w20 | PCU gold, 10x sampling | 20 / 10 | 10.3% (5.6 to 15.7), 32 / 311 | -10.0 (-16.0 to -4.8) | 51% |
+| B3w40 | PCU gold, 10x sampling | 40 / 20 | 21.8% (16.0 to 29.0), 59 / 271 | +1.5 (-4.3 to +8.0) | 48% |
 
-The constraint weight is a real lever with an optimum near 10; too high and the fit follows every constraint strip at the expense of the tracks. Fits that also used the organisers' verified patches: A 15.9% without, B 15.6% with the constraints (no change: patches already pin those wraps). With human windings (not held out) the fit reaches 3.0%. Absolute-winding ladders: A2 4/7, B2 5/5, B3w10 8/8 on the modal offset. Jobs: `kaggle/pcu-fit-auto/` (A2, B2), `kaggle/pcu-fit-b3/` (B3); the fit's own satisfaction metrics are in `results/fit/`.
+Selection-free estimate (the weight sweep was scored on the same 32 ladders): choose the weight on a random half of the ladders, score the chosen fit on the other half, 200 splits: **10.2% (6.6 to 15.6) against 20.2% for A2 on the same halves**; B3w10 is chosen on 134 splits and B4w20 on 66. The constraint weight is a real lever with an optimum near 10 to 20; at 40 the fit follows the strips at the expense of the tracks. Note that even the best fit satisfies fewer than half of the strips at its own tolerance ("strips satisfied", from the fit's metrics in `results/fit/`): the constraints move the solution without being met individually. Fits that also used the organisers' verified patches: A 15.9% (10.4 to 21.4) without, B 15.6% (8.5 to 22.5) with the constraints (no change: patches already pin those wraps). With human windings (not held out) the fit reaches 3.0%. Absolute-winding ladders: A2 4/7, B2 5/5, B3w10 8/8 on the modal offset. Jobs: `kaggle/pcu-fit-auto/` (A2), `kaggle/pcu-fit-b/` (B2, B), `kaggle/pcu-fit-b3/` (B3w10, B3w40), `kaggle/pcu-fit-b4/` (B4w4, B4w20). `results/fit/fit_logs_excerpt.txt` shows which runs loaded constraints (the first B2 attempt in `pcu-fit-auto` did not, because of a missing JSON version field, and is not used).
 
-**Gold-ladder metric for scrolls without human ladders** (`exp/e43_eval_gold.py`): PCU gold ladders from slices held out of the fit serve as ground truth. Calibration on Paris 4 against the human-ladder metric: A2 26.7% / B2 26.1% (harsher, and it discriminates weakly, so treat eligible-scroll numbers as relative).
+**Gold-ladder metric for scrolls without human ladders** (`exp/e43_eval_gold.py`, and `exp/e31b_bootstrap.py gold`): PCU gold ladders from slices held out of the fit serve as ground truth. This measures agreement between the fit and PCU, not with a human, and the certificate's own errors are in the reference. Calibration on Paris 4 against the human-ladder metric: A2 26.7% / B2 26.1% (harsher, and it discriminates weakly, so treat eligible-scroll numbers as relative).
 
-**PHerc0826 (eligible scroll), band z 8500-9500**, scored on 8 gold slices never given to any fit (`data/gold/gold0826_heldout8.json`, 3,426 ladders):
+**PHerc0826 (eligible scroll), band z 8500-9500**, constraints on 63 slices every 16 (`data/gold/pcu_gold_0826_fit_v2.json`), scored on 8 gold slices interleaved between them and never given to any fit (`data/gold/gold0826_heldout8.json`; 3,000 of its 3,426 ladders, random subsample, seed 0; `results/fit/e31b_pherc0826_bootstrap.json`):
 
-| Fit | Constraints | Slips per wrap | Unassigned ladder points |
-|---|---|---|---|
-| A0 | none | 50.1% | 2,017 |
-| B0 | gold v1, default weight | 44.9% | |
-| B1w10 | gold v2, 10x sampling, weight 10 | 39.0% | |
-| **B1w20** | gold v2, 10x sampling, weight 20 | **36.4%** | 1,425 |
-| C1 | as B1w20 plus our outer shell | 36.5% | |
+| Fit | Constraints | Slips per wrap (CI) | Paired difference vs A0 | Unassigned ladder points | Strips satisfied |
+|---|---|---|---|---|---|
+| A0 | none | 50.1% (48.5 to 51.8), 2066 / 4122 | | 1,750 | |
+| B0 | gold v1, default weight | 45.1% (43.4 to 46.7) | -5.1 (-6.5 to -3.6) | 1,502 | 27% |
+| B1w10 | gold v2, 10x sampling, 10 / 10 | 38.7% (37.1 to 40.4) | -11.4 (-13.1 to -9.7) | 1,304 | 44% |
+| **B1w20** | gold v2, 10x sampling, 20 / 10 | **36.3%** (34.8 to 37.9), 1713 / 4717 | **-13.8 (-15.5 to -12.1)** | 1,237 | 47% |
+| C1 | as B1w20 plus our outer shell | 36.4% (34.8 to 37.9) | -13.8 (-15.4 to -12.0) | 1,243 | 47% |
 
-A 27% relative reduction, and the surfaces cover more sheets (fewer unassigned points). The eligible-scroll fit remains far worse than Paris 4 (9 to 20%): sheet placement, not winding labels, is the remaining problem there (the fitted surfaces sit 2 to 8 voxels off the sheet, which `pcu/refine.py` corrects after the fit).
+Selection-free (weight chosen on half the ladders): 36.4%, since w20 wins on 199 of 200 splits. A 27% relative reduction in disagreement with PCU, and the surfaces cover more sheets (fewer unassigned points). The eligible-scroll fit remains far worse than Paris 4 (9 to 20%): sheet placement, not winding labels, is the remaining problem there (the fitted surfaces sit 2 to 8 voxels off the sheet, which `pcu/refine.py` corrects after the fit).
 
 ## 3. Whole-slice automatic winding fields (secondary result)
 
@@ -141,7 +155,9 @@ pieces of the sheet skeleton (split at junctions, phase residues and the branch 
 certified +1 steps; wrap labels come from one exact L1 integer synchronization (network-matrix LP,
 integral optimum), after dropping pieces whose incident certified edges are mostly violated (pieces
 that silently merged two sheets). Because a label is per piece, a sheet cannot change wrap along a
-piece. Scored on 8 slices:
+piece. Ladder slips scored on 8 slices (4225, 4490, 5197, 5857, 6000, 6750, 7530, 7847); the verified-patch
+columns on the 4 of them that have patches (so the 5.1% MCF row here is not the 182-ladder figure of
+section 3):
 
 | Method | Ladder slips | Verified-patch points on one wrap | Patches with a jump |
 |---|---|---|---|
@@ -183,7 +199,8 @@ because a wrong relative-winding label pulls the whole spiral fit.
 
 ## 7. Also measured (negative or neutral results, to save others time)
 
-- Recto-surface prediction as the phase source (L2): worse than Lasagna cos (15% vs 9% slips).
+- Recto-surface prediction as the phase source (L2): worse than Lasagna cos (15% vs 9% slips on an early
+  25-ladder-window test, before the section 3 metric existed).
 - Averaging the complex phase over +-4 slices: no residue reduction (defects are structural).
 - Goldstein spectral filter: -30% residues, fewer ladder slips, no gain along sheets.
 - Cut costs from density agreement or recto support: no measurable gain.
@@ -198,8 +215,10 @@ OUT=runs/constraints python exp/e13_band.py <z_lo> <z_hi> 2   # a z-band -> pcu_
 python exp/e9_certificate.py                             # precision / coverage on the human ladders (results/e9.log)
 python exp/e12_validate_generated.py                     # independent validation of generated steps
 python exp/e63_merge_gold.py out.json 'runs/constraints/*_gold.json'   # merge into one document for fit_spiral
-python exp/e31_eval_fit.py ...                           # slips per wrap of a fit on held-out human ladders
-python exp/e43_eval_gold.py ...                          # the same with PCU gold ladders (scrolls without human ladders)
+python exp/e9b_negative.py                               # the certificate on 2- and 3-wrap pairs (negative set)
+python exp/e31_eval_fit.py <run>                         # slips per wrap of a fit on held-out human ladders
+python exp/e43_eval_gold.py <run>                        # the same with PCU gold ladders (scrolls without human ladders)
+python exp/e31b_bootstrap.py human A2=<dir> B3w10=<dir> --ref A2 --sweep ... --out out.json   # with ladder-level CIs
 ```
 
 Lasagna predictions are read from the organisers' bucket; `exp/e13_band.py` defaults to `OUT=runs/constraints_tiered`. The audit gallery is `results/annotation_audit.png` with `results/annotation_audit.json`.

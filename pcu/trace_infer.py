@@ -3,7 +3,8 @@
     python -m pcu.trace_infer <zarr_url_or_path> <checkpoint.pth> <out.png> [--reverse] [--stride 64]
 
 Input: a zarr array (L, H, W) uint8 with rows along z and the inner (recto) face first, at about 9.362 um per pixel
-and per layer (8.64 um scans: pass --resample 8.64). The central 17 layers are used. Output: an ink probability
+(8.64 um scans: pass --resample 8.64, which resamples in-plane only, as in training; the layer spacing is left
+as scanned). The central 17 layers are used. Output: an ink probability
 map (uint8 PNG, 0-255) at the input resolution. Checkpoints are in ink_9um format (build_repo_training_model_bundle).
 Requires the organisers' repositories on sys.path: ext/villa-ink/ink-detection (koine_machines) and
 ext/villa/vesuvius/src (vesuvius.image_proc), see README."""
@@ -36,7 +37,7 @@ def predict(model, sv, device="cpu", stride=64, P=128, Z=17, batch=64):
         for k in range(0, len(coords), batch):
             b = coords[k:k + batch]
             x = np.stack([sv[z0:z0 + Z, r:r + P, q:q + P] for r, q in b]).astype(np.float32)
-            keep = (x[:, Z // 2] > 0).reshape(len(b), -1).mean(1) > 0.3
+            keep = (x[:, Z // 2] > 0).reshape(len(b), -1).mean(1) > 0  # same rule as eval_trace.py
             if not keep.any():
                 continue
             x = np.stack([normalize_robust(p) for p in x]).astype(np.float32)
@@ -68,8 +69,9 @@ def main():
     import imageio.v2 as imageio
     from scipy import ndimage as ndi
     if a.input.startswith("http"):
+        import re
         from pcu import data
-        rel = a.input.split(".amazonaws.com/", 1)[1] if ".amazonaws.com/" in a.input else a.input
+        rel = re.sub(r"^https?://[^/]+/", "", a.input)  # path inside the open-data bucket
         arr = data.open_array(rel)
     else:
         import zarr
@@ -78,7 +80,7 @@ def main():
     if a.reverse:
         sv = sv[::-1]
     if a.resample and abs(a.resample - 9.362) > 0.05:
-        f = a.resample / 9.362; sv = ndi.zoom(sv, (f, f, f), order=1)
+        f = a.resample / 9.362; sv = ndi.zoom(sv, (1, f, f), order=1)  # in-plane only, as in training
     model, dev = load_model(a.checkpoint)
     p = predict(model, sv, dev, stride=a.stride)
     imageio.imwrite(a.out, (p * 255).astype(np.uint8))

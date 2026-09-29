@@ -12,11 +12,11 @@
     "satisfied_area": 0.0,
     "total_area": 0.0,
     "satisfied_area_fraction": 0.0,
-    "satisfied_tracks": 299252,
-    "total_tracks": 1429850,
-    "satisfied_tracks_fraction": 0.20928908626779033,
-    "satisfied_track_points": 37668915,
-    "total_track_points": 70900763,
-    "satisfied_track_points_fraction": 0.5312906858280213
+    "satisfied_tracks": 66476,
+    "total_tracks": 872594,
+    "satisfied_tracks_fraction": 0.07618205030059799,
+    "satisfied_track_points": 15442719,
+    "total_track_points": 37365237,
+    "satisfied_track_points_fraction": 0.41329107587354524
   }
 }
