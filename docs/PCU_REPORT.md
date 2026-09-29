@@ -73,10 +73,21 @@ tolerance is swept from 0.05 to 0.5 (density tolerance 1.2x the local one), with
 the test measures how often the certificate says 2 (or 0) where the truth is 1. It cannot measure the error
 that hurts a spiral fit most, certifying "1 wrap" across a sheet Lasagna missed, because no two-wrap pairs are
 in it (a constant "1" predictor would score 100% here, which is why the 95.6% base rate above is only a
-partial yardstick). `exp/e9b_negative.py` runs the same certificate on the (i, i+2) and (i, i+3) pairs of the
-same ladders and reports how many are accepted and, of those, how many are certified as 1; its output is
-`results/e9b.log` (added when the run completes). The one measurement of this failure so far is on
-PHerc0139 (section 5): 5 to 8% of truly two-wrap pairs certified as one.
+partial yardstick). `exp/e9b_negative.py` runs the same certificate, same thresholds, on the (i, i+2) and
+(i, i+3) pairs of the same ladders (`results/e9b.log`, per-pair rows in `results/e9b_rows.json`):
+
+| True wrap difference | Pairs | Certified | Precision | Errors | Certified as "1" |
+|---|---|---|---|---|---|
+| 1 | 1,502 | 1,052 (70%) | 99.62% | 4 | 1,048 (correct) |
+| 2 | 1,320 | 636 (48%) | 98.58% | 9 | **1** |
+| 3 | 1,144 | 411 (36%) | 94.89% | 21 | 0 |
+
+Over all 3,966 pairs the certificate accepts 2,099 at 98.4% precision, where a constant "1" would score 50.1%
+on the same accepted set. The error that matters for a fit, a missed sheet certified as one wrap, happens
+once in 636 certified two-wrap pairs on Paris 4 (0.16%). Precision falls with distance (most errors on
+three-wrap pairs are counts of 2 or 4), which is why the generator steps one wrap at a time and never
+certifies long spans directly. On PHerc0139, without retuning, the rate of two-wrap pairs certified as one is
+5 to 8% (section 5), so the Paris 4 figure does not transfer unchanged to a crushed scroll.
 
 By wrap spacing (the dense regions are where constraints are needed most):
 

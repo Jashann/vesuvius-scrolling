@@ -16,6 +16,16 @@ def test_certificate_numbers():
     assert abs(np.mean(rl == dw) - 0.9561) < 0.0001
 
 
+def test_negative_set_numbers():
+    rows = json.load(open(f"{ROOT}/results/e9b_rows.json"))
+    loc = np.array([r["loc"] for r in rows]); den = np.array([r["den"] for r in rows]); glob = np.array([r["glob"] for r in rows]); dw = np.array([r["dw"] for r in rows])
+    rl, rd = np.round(loc), np.round(den)
+    c = (rl == rd) & (rl == glob) & (np.abs(loc - rl) < 0.25) & (np.abs(den - rd) < 0.3)
+    two = dw == 2
+    assert int((c & two).sum()) == 636 and int(np.sum((rl == 1) & c & two)) == 1
+    assert int((c & (dw == 3)).sum()) == 411 and int(np.sum((rl == 1) & c & (dw == 3))) == 0
+
+
 def test_fit_numbers():
     p4 = json.load(open(f"{ROOT}/results/fit/e31b_paris4_bootstrap.json"))
     assert p4["A2"]["slips"] == 59 and p4["A2"]["pairs"] == 291

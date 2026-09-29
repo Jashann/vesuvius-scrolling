@@ -20,6 +20,8 @@ Two tools, both aimed at the open problems for the eligible scrolls.
 
 Around them: an umbilicus estimator and band method for the eligible scrolls without a published centre line, a fit-plus-survey job for Kaggle (T4 x2) that fitted first bands of PHerc0191, 0257, 0358, 0813 and 0800, and a hotspot vetting protocol (depth profile, neighbouring-sheet control, lattice test) that showed eight of nine text-range hotspots on eligible scrolls to be regional texture. Negative results are documented with numbers (de-Paganin, flat fit-free patches, score-guided surface warping, synthetic ink insertion, dual-energy lead detection). No letters were read.
 
+**Negative-set check:** on the same ladders the certificate calls 1 of 636 certified two-wrap pairs a one-wrap pair (Paris 4); precision 98.6% at two wraps, 94.9% at three.
+
 **Open problems addressed:** winding constraints; ink detection at the eligible protocol; label quality (annotation audit); false-positive control for ink surveys.
 
 **Links:** README (results, usage, limitations), docs/PCU_REPORT.md, docs/TRACE.md, MODEL_CARD.md, eval_trace.py (one-command reproduction). Weights: GitHub release assets.
