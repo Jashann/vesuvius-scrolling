@@ -57,7 +57,12 @@ whole-slice field 94.7%.
 | local = density | 88.5% | 98.27% | 23 | 97.4% |
 | local = density = field | 85.8% | 98.99% | 13 | 98.3% |
 | **all agree, near-integer** | **70.0%** | **99.62%** | **4** | **99.0%** |
-| held-out calibration (20 random half splits by slice) | 69.5% | 99.64% (worst 99.24%) | | |
+| held-out calibration (20 random half splits by slice: density scale fitted on half the slices, certificate scored on the other half) | 70.4% | 99.70% (worst 99.40%) | | |
+
+Every number in this section is regenerated from `results/e9_rows.json` by `python exp/e9_report.py` (seconds, no
+bucket access) and checked by `tests/test_report_numbers.py`. The half-split row is the script's procedure
+(scale k = 0.804 +- 0.012 across splits); the original run of the experiment gave 99.64% (worst 99.24%) at
+69.5% coverage with k = 0.810.
 
 Figure `docs/fig/pcu_precision_coverage.png` traces precision against coverage as the near-integer
 tolerance is swept from 0.05 to 0.5 (density tolerance 1.2x the local one), with the operating point
@@ -81,7 +86,7 @@ By wrap spacing (the dense regions are where constraints are needed most):
 | 96-134 um | 230 | 70% | 100% |
 | 134-173 um | 238 | 71% | 100% |
 | 173-230 um | 353 | 75% | 99.6% |
-| > 230 um | 620 | 71% | 99.3% |
+| > 230 um | 620 | 70% | 99.3% |
 
 **Generated constraints validated independently.** The generator seeds on sheet crests and steps
 outward one wrap at a time, keeping a step only if it is certified. Steps whose endpoints fall within

@@ -31,7 +31,7 @@ Definitions. A *ladder* is a human-clicked line of points across consecutive wra
 
 The negative-set test that matters for a fit (does the certificate ever certify "1 wrap" across a missed sheet?) is `exp/e9b_negative.py`; its result is in `docs/PCU_REPORT.md` section 2 as soon as the run finishes. On PHerc0139, without retuning, the certificate accepts 5 to 8% of truly two-wrap pairs as one wrap (section 5 of the report).
 
-Reproduce the ink table from public data in one command (`python eval_trace.py`, about 85 minutes on a T4 for 7 models x 4 segments; the 10-minute check is `python eval_trace.py --models base,v3B --segments te1`, expected 0.747 and 0.868). The winding certificate: `python exp/e9_certificate.py` (laptop, 15 minutes, writes `runs/e9_rows.json`; the copy we ran is `results/e9_rows.json`). The fit numbers: `python exp/e31b_bootstrap.py` on the grids from release v1.1.
+Reproduce the ink table from public data in one command (`python eval_trace.py`, about 85 minutes on a T4 for 7 models x 4 segments; the 10-minute check is `python eval_trace.py --models base,v3B --segments te1`, expected 0.747 and 0.868). The winding certificate: `python exp/e9_certificate.py` (laptop, 15 minutes, writes `runs/e9_rows.json`; the copy we ran is `results/e9_rows.json`), and `python exp/e9_report.py` regenerates every certificate table from those rows in seconds. The fit numbers: `python exp/e31b_bootstrap.py` on the grids from release v1.1. `python -m pytest tests` checks that the numbers quoted in the docs follow from the committed result files.
 
 ### Figures
 

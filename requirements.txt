@@ -19,6 +19,7 @@ einops
 timm
 pyyaml
 tqdm
+pytest
 pynrrd          # imported by the organisers' vesuvius package on import
 # organisers' code, cloned next to this repo at the pinned commits (see README "Setup"):
 #   ext/villa-ink/ink-detection  (koine_machines, branch merge-ink-pipelines, commit 3ea17f5)
