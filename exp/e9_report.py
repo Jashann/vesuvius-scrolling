@@ -36,6 +36,10 @@ for k, m in tiers.items():
     n = int(m.sum()); e = int(np.sum(pred[m] != dw[m]))
     print(f"{k:40s} {m.mean():8.3f}  {1 - e / n:9.4f}  {e:6d}  {n:9d}  {wilson_low(n - e, n):.4f}")
 c = tiers["all agree, near-integer (0.25 / 0.30)"]
+print("\nby region (level-3 slice ranges of the two spiral-fit bands):")
+for lo, hi, lab in ((4200, 4700, "z2 8400-9400 (fit band 1)"), (5500, 6000, "z2 11000-12000 (fit band 2)")):
+    m = (z3 >= lo) & (z3 < hi); cm = c & m
+    print(f"  {lab:28s} pairs {m.sum():4d}  local {np.mean(pred[m] == dw[m]):.3f}  certified {cm.sum() / max(m.sum(), 1):4.0%}  precision {np.mean(pred[cm] == dw[cm]):.4f} ({int(np.sum(pred[cm] != dw[cm]))} errors in {cm.sum()})")
 print("\nby wrap spacing (pair length; L3 pixel = 19.2 um):")
 for lo, hi, lab in ((0, 5, "< 96 um"), (5, 7, "96-134 um"), (7, 9, "134-173 um"), (9, 12, "173-230 um"), (12, 1e9, "> 230 um")):
     m = (L >= lo) & (L < hi); cm = c & m

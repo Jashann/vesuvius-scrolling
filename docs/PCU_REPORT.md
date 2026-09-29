@@ -9,9 +9,10 @@ consumes. On all 1,502 human adjacent-wrap pairs of PHerc. Paris 4 (63 slices), 
 Wilson lower bound 99.0%), **100% correct in the densest bands** (wrap spacing under 173 um); the
 gold tier of automatically generated steps is **942 / 942** against human ladders (lower bound 99.6%),
 and the precision holds on held-out calibration splits (99.7%). In the organisers' spiral fitter the
-constraints cut winding slips per wrap from 20.3% to 9.3% on Paris 4 (held-out human ladders, ladder-level
-bootstrap CI 6.2 to 12.7%, selection-free 10.2%) and from 50.1% to 36.3% on the eligible scroll PHerc0826
-measured against PCU's own gold ladders on held-out slices (section 2b).
+constraints cut winding slips per wrap from 20.3% to 9.3% in one Paris 4 band (held-out human ladders,
+ladder-level bootstrap CI 6.2 to 12.7%, selection-free 10.2%, replicated with a second seed at 22.1% to 8.8%),
+but not in a second, harder band (30.6% to 28.6%, CI of the difference -11 to +8 points), and from 50.1% to
+36.3% on the eligible scroll PHerc0826 measured against PCU's own gold ladders on held-out slices (section 2b).
 
 Why it matters: the organisers' stated bottleneck is "winding constraints that are precise and fast
 enough to use widely" (Winding Constraints open problem), and their note on the community
@@ -89,6 +90,14 @@ three-wrap pairs are counts of 2 or 4), which is why the generator steps one wra
 certifies long spans directly. On PHerc0139, without retuning, the rate of two-wrap pairs certified as one is
 5 to 8% (section 5), so the Paris 4 figure does not transfer unchanged to a crushed scroll.
 
+By region (the two bands used for the spiral-fit experiments in section 2b; `python exp/e9_report.py` prints these):
+
+| Band (level-2 z) | Pairs | Local count accuracy | Certified | Precision |
+|---|---|---|---|---|
+| 8400-9400 (fit band 1) | 394 | 98.2% | 78% | 99.68% (1 error in 308) |
+| 11000-12000 (fit band 2) | 212 | 92.0% | 51% | 98.17% (2 errors in 109) |
+| all 63 slices | 1,502 | 95.6% | 70% | 99.62% |
+
 By wrap spacing (the dense regions are where constraints are needed most):
 
 | Spacing | Pairs | Certified | Precision |
@@ -147,6 +156,15 @@ Setup: the organisers' `fit_spiral.py` (villa `6bbe6e2`), PHerc. Paris 4 band z2
 | B3w10, PCU gold | 9.3% (6.2 to 12.7), 30 / 324 | 8.8% (5.7 to 12.4), 30 / 339 | seed 1: -11.0 (-15.8 to -7.2); seed 2: -13.2 (-19.4 to -8.6) |
 
 Seed-to-seed movement is about 2 points for A2 and 0.5 for B3w10 (strips satisfied 44.9% in both seeds), against an 11 to 13 point gap between the two conditions.
+
+**Second band: not replicated.** Same protocol in z2 11000-12000 (38 human ladders, 212 pairs; a dense gold file generated for that band with `modal/gold_band.py`, 52,260 ladders on 63 slices; weight fixed at the band-1 choice 10 / 10; grids `grids_Paris4_{A2,B3w10}_z11000.npz` and `pcu_gold_Paris4_z11000_12000_fit_input.json` on release v1.1; `results/fit/e31b_paris4_z11000_bootstrap.json`, `results/fit/modal-z11000/`):
+
+| Fit | Slips per wrap (CI) | Paired difference | Strips satisfied |
+|---|---|---|---|
+| A2, no constraints | 30.6% (24.7 to 37.1), 48 / 157 | | |
+| B3w10, PCU gold | 28.6% (19.8 to 37.9), 46 / 161 | -2.0 (-10.7 to +7.7) | 44% |
+
+The constraints were loaded and satisfied at the same rate as in band 1, and the fit baseline is worse (30.6% vs 20.3%): this is a harder region. The certificate is weaker there too, on the human pairs of that band: local phase count 92.0% (band 1: 98.2%), certified 51% of pairs (78%), precision 98.2%, 2 errors in 109 (99.7%, 1 in 308), median pair spacing 10.4 px (12.7). So the band-1 result is a favourable case, and the fit gain depends on how well Lasagna resolves the sheets in the region: where the certificate covers most pairs at 99.7%, the constraints halve the slips; where it covers half of them at 98%, they do nothing measurable on 212 pairs. Two bands cannot locate the boundary; the honest claim is "large gain in one band, replicated across seeds, absent in a second, harder band".
 
 Selection-free estimate (the weight sweep was scored on the same 32 ladders): choose the weight on a random half of the ladders, score the chosen fit on the other half, 200 splits: **10.2% (6.6 to 15.6) against 20.2% for A2 on the same halves**; B3w10 is chosen on 134 splits and B4w20 on 66. The constraint weight is a real lever with an optimum near 10 to 20; at 40 the fit follows the strips at the expense of the tracks. Note that even the best fit satisfies fewer than half of the strips at its own tolerance ("strips satisfied", from the fit's metrics in `results/fit/`): the constraints move the solution without being met individually. "10x sampling" is `sample_count_unattached_pcls_per_step=840` in the job scripts; the fitter divides these counts by the number of z blocks, so the logs print 88 (and 9 for the default 84). The fits are compared on slightly different subsets of the 394 held-out pairs (256 to 365), because pairs with an unassigned point are dropped; the paired bootstrap uses each fit's own assigned pairs within the resampled ladders.
 

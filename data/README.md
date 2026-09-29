@@ -35,6 +35,7 @@ On release v1.1: the spiral-fit output grids (one `wNNN` array of shape (3, rows
 | `grids_PHerc0826_C0.npz` | `dc066ab0eafecd1e570a2bf7c1ac5d409951a76e9d10c9890aeb68303d83c4a9` |
 | `grids_PHerc0826_C1.npz` | `3b3efba6c49ad4c46d25a0b5cd7d7ce5dcdfd7d58a1b2c5c9be75dd4d2d5f2d8` |
 | `grids_Paris4_A2_seed2.npz`, `grids_Paris4_B3w10_seed2.npz` (second-seed replication, `modal/fit_p4.py`) | see `results/release_v1.1_sha256.txt` |
+| `grids_Paris4_A2_z11000.npz`, `grids_Paris4_B3w10_z11000.npz`, `pcu_gold_Paris4_z11000_12000_fit_input.json` (second band, 52,260 ladders on 63 slices every 16 from z 11000, `modal/gold_band.py`) | see `results/release_v1.1_sha256.txt` |
 | `pcu_gold_Paris4_z8400_9400_fit_input.json` (62,260 ladders on 63 slices, one every 16 level-2 slices from z 8400, the dense band file the Paris 4 fit jobs loaded; same generator as the whole-scroll file, which has two slices per 64) | `8aa44a98a2a8af7aa396b13060e7ac61d1496f5b1ddfe4b8934d000743fa971b` |
 
 (The Paris 4 fit C grid, human windings as input, is `grids_Paris4_C.npz` if present; it is scored in the report for reference only.)

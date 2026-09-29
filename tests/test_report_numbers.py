@@ -35,6 +35,8 @@ def test_fit_numbers():
     s2 = json.load(open(f"{ROOT}/results/fit/e31b_paris4_seed2_bootstrap.json"))
     assert s2["A2_s2"]["slips"] == 66 and s2["B3w10_s2"]["slips"] == 30 and s2["B3w10_s2"]["pairs"] == 339
     assert s2["B3w10_s2"]["ci95"][1] < s2["A2_s2"]["ci95"][0]
+    b2 = json.load(open(f"{ROOT}/results/fit/e31b_paris4_z11000_bootstrap.json"))
+    assert b2["A2"]["slips"] == 48 and b2["B3w10"]["slips"] == 46 and b2["B3w10"]["diff_vs_ref"]["ci95"][1] > 0, "band 2 shows no gain; docs must say so"
     s = json.load(open(f"{ROOT}/results/fit/e31b_pherc0826_bootstrap.json"))
     assert abs(s["A0"]["rate"] - 0.501) < 0.002 and abs(s["B1w20"]["rate"] - 0.363) < 0.002
 
