@@ -1,6 +1,6 @@
 # TRACE: ink detection at the eligible protocol
 
-**Summary.** The released `ink_9um` model was distilled mostly from 2.4 um data downsampled 4x. Fine-tuning it on the organisers' *real* 9.362 um surface volumes, with their 2.4 um ink predictions of the same meshes as soft targets, raises AUC against human labels on a scroll never trained on (PHerc0841) from 0.705 to 0.747 (base) to 0.803 to 0.857 (v1). Adding the public fragment pairs at the coarse protocols (8.64 um PHerc0009B and PHerc0343P, 9.362 um PHerc0500P2) adds another 0.01 to 0.02 (v3B: 0.837 to 0.868), within the checkpoint-selection spread. Reproduce with `python eval_trace.py`; the run we did is in `results/trace_heldout_auc.json` and `results/eval_trace.log`.
+**Summary.** The released `ink_9um` model was distilled mostly from 2.4 um data downsampled 4x. Fine-tuning it on the organisers' *real* 9.362 um surface volumes, with their 2.4 um ink predictions of the same meshes as soft targets, raises AUC against human labels on a scroll never trained on (PHerc0841) from 0.705 to 0.746 (base) to 0.803 to 0.857 (v1). Adding the public fragment pairs at the coarse protocols (8.64 um PHerc0009B and PHerc0343P, 9.362 um PHerc0500P2) adds another 0.01 to 0.02 (v3B: 0.837 to 0.868), within the checkpoint-selection spread. Reproduce with `python eval_trace.py`; the run we did is in `results/trace_heldout_auc.json` and `results/eval_trace.log`.
 
 ## 1. Why
 
@@ -35,7 +35,7 @@ AUC against human labels on PHerc0841 and on PHerc0139 w043; w043 also against t
 | TRACE v3A (step 4000) | 0.866 | 0.860 | 0.832 | 0.886 | 0.745 |
 | TRACE v3B (step 5000) | **0.868** | **0.862** | **0.837** | 0.899 | 0.760 |
 
-Two readings. On PHerc0841 (dense human labels, a scroll none of the models saw) every fine-tune beats the base model by 0.10 to 0.13. On w043 the fine-tunes track the teacher map (0.90) but score *below* the base model against the sparse human labels there: they inherit the teacher's errors where it disagrees with the annotators. Pixels are spatially correlated, so the per-segment AUC has no small-sample guarantee; the evidence is that three independent segments move in the same direction by a similar amount, and that the seed-42 vs seed-43 base models (both in `eval_trace.py`) give the run-to-run yardstick. How the PHerc0841 labels were drawn (over CT, or over a 2.4 um prediction) is not documented here; if over predictions, part of the gain is agreement with the teacher.
+Two readings. On PHerc0841 (dense human labels, a scroll none of the models saw) every fine-tune beats the base model by 0.10 to 0.13. On w043 the fine-tunes track the teacher map (0.90) but score *below* the base model against the sparse human labels there: they inherit the teacher's errors where it disagrees with the annotators. Pixels are spatially correlated, so the block bootstrap above is the honest uncertainty; the evidence is that three independent segments move in the same direction by two to three times the seed-to-seed spread. How the PHerc0841 labels were drawn (over CT, or over a 2.4 um prediction) is not documented here; if over predictions, part of the gain is agreement with the teacher.
 
 Reversed layer order scores near chance for every model, so surface volumes must be inner (recto) face first.
 
