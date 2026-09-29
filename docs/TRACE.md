@@ -1,6 +1,6 @@
 # TRACE: ink detection at the eligible protocol
 
-**Summary.** The released `ink_9um` model was distilled mostly from 2.4 um data downsampled 4x. Fine-tuning it on the organisers' *real* 9.362 um surface volumes, with their 2.4 um ink predictions of the same meshes as soft targets, raises AUC against human labels on a scroll never trained on (PHerc0841) from 0.705 to 0.747 (base) to 0.803 to 0.857 (v1). Adding the public fragment pairs at the coarse protocols (8.64 um PHerc0009B and PHerc0343P, 9.362 um PHerc0500P2) adds another 0.01 to 0.02 (v3: 0.837 to 0.868). Reproduce with `python eval_trace.py`.
+**Summary.** The released `ink_9um` model was distilled mostly from 2.4 um data downsampled 4x. Fine-tuning it on the organisers' *real* 9.362 um surface volumes, with their 2.4 um ink predictions of the same meshes as soft targets, raises AUC against human labels on a scroll never trained on (PHerc0841) from 0.705 to 0.747 (base) to 0.803 to 0.857 (v1). Adding the public fragment pairs at the coarse protocols (8.64 um PHerc0009B and PHerc0343P, 9.362 um PHerc0500P2) adds another 0.01 to 0.02 (v3B: 0.837 to 0.868), within the checkpoint-selection spread. Reproduce with `python eval_trace.py`; the run we did is in `results/trace_heldout_auc.json` and `results/eval_trace.log`.
 
 ## 1. Why
 
@@ -13,7 +13,7 @@ Ink at the eligible protocol (9.362 um, 1.2 m propagation, 113 keV, Paganin) is 
 | v1 train | 32 (PHerc0139, PHerc0814; `TRACE_NTRAIN=32` over the 56-entry manifest) | organisers' 9.362 um surface volumes, central 22 layers | organisers' 2.4 um ink prediction on the same mesh, resized to the coarse canvas |
 | v2 train | 56 (same scrolls) | same | same |
 | v3 train | 128: v2 + PHerc0009B (18, 8.64 um), PHerc0343P (8, 8.64 um), PHerc0500P2 (46, 9.362 um) | 8.64 um volumes resampled in-plane to 9.362 um | fragment 2.2 to 2.4 um ink predictions |
-| held out | PHerc0841 (3 segments, the organisers' human ink labels, 9.366 um), PHerc0139 w043 (2.4 um map and sparse human labels; its neighbouring wraps w041, w042, w044 to w046 are in the training set, so w043 is not fully held out) | | |
+| held out | PHerc0841 (3 segments, the organisers' human ink labels, 9.366 um), PHerc0139 w043 (2.4 um map and sparse human labels; its neighbouring wraps w041, w042, w045 and w046 are in the v1 training subset and w044 too in v3, so w043 is not fully held out) | | |
 
 PHerc0841 segments: `w00` (`20260220213127-w00`), `ag144` (`20260220214732-auto_grown_20260220144552896`), `ag174` (`20260221022814-auto_grown_20260220174252405`); `ag` is "auto-grown", the organisers' naming. Manifests: `runs/trace_manifest.json` (v1/v2), `runs/trace_manifest_v3.json` (v3, built by `exp/e93_manifest_v3.py`).
 
@@ -53,7 +53,7 @@ Reversed layer order scores near chance for every model, so surface volumes must
 | KLAVIS (dense9um-all7) | 85 |
 | hecate 9.6 um | 81 |
 
-Every public detector responds to the real ink there, weakly, and the base model ranks highest. One site cannot rank detectors (the percentile is the best of 20 settings per model, the crop contains one 3 mm disk of ink, and the ranking disagrees with the PHerc0841 labels); the harness is offered as a control anyone can run, not as evidence for TRACE. Figure: `docs/fig/pherc1447_site.jpg` (the bright ring at the right of the detector panels is a void edge). For 8.64 um scrolls there is no evidence that TRACE beats the base model.
+Every public detector responds to the real ink there, weakly, and the base model ranks highest. One site cannot rank detectors (the percentile is the best of 20 settings per model, the crop contains one 3 mm disk of ink, and the ranking disagrees with the PHerc0841 labels); the harness is offered as a control anyone can run, not as evidence for TRACE. All 20 settings per model are in `results/e90_pherc1447_results.json`. Figure: `docs/fig/pherc1447_site.jpg` (two of the detectors; the bright ring at the right of the detector panels is a void edge). For 8.64 um scrolls there is no evidence that TRACE beats the base model.
 
 ## 5. Survey pipeline and vetting
 

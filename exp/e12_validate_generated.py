@@ -16,14 +16,16 @@ Y0, Y1, X0, X1 = 416, 3296, 672, 4000
 tol = float(os.environ.get("TOL", 2.5))
 cos3 = data.lasagna("cos", 3); gm4 = data.lasagna("grad_mag", 4)
 REC = "PHercParis4/representations/predictions/surfaces/20260411134726-surface-20260413141734-surface-recto-2um-ps256-L0-th0.45.zarr"
-rec1 = data.open_array(f"{REC}/1")
+RL = int(os.environ.get("RECTO_LEVEL", 1))  # 1 = 4.8 um recto map (1,047/1,047), 2 = 9.6 um (942/942, the released files)
+SC = 8 // (2 ** RL)                          # L3 px -> recto-map px
+rec1 = data.open_array(f"{REC}/{RL}")
 
 
 def recto_count(r1, a, b, oy, ox, shift=1.5, thr=0.35):
     """Recto bands crossed on the segment a->b (L3 coords), both ends shifted `shift` L3 px outward;
-    counted on the L1 recto map r1 whose origin is (oy, ox) in L1 px."""
+    counted on the recto map r1 (level RL) whose origin is (oy, ox) in its px."""
     d = (b - a) / max(np.linalg.norm(b - a), 1e-6)
-    a2, b2 = (a + shift * d) * 4, (b + shift * d) * 4
+    a2, b2 = (a + shift * d) * SC, (b + shift * d) * SC
     n = max(int(np.linalg.norm(b2 - a2) * 2), 8); t = np.linspace(0, 1, n)
     prof = ndi.map_coordinates(r1, [a2[0] + t * (b2[0] - a2[0]) - oy, a2[1] + t * (b2[1] - a2[1]) - ox], order=1)
     above = prof > thr
@@ -50,10 +52,10 @@ for zi, z3 in enumerate(zs):
     g3 = ndi.zoom(g, 2, order=1)[: c.shape[0], : c.shape[1]]
     L = [l for l in lad if l["z3"] == z3]
     allp = np.concatenate([l["yx"] for l in L])
-    oy, ox = int((allp[:, 0].min() + Y0 - 40) * 4), int((allp[:, 1].min() + X0 - 40) * 4)
-    ey, ex = int((allp[:, 0].max() + Y0 + 40) * 4), int((allp[:, 1].max() + X0 + 40) * 4)
-    r1 = ndi.gaussian_filter(data.read(rec1, (slice(4 * z3, 4 * z3 + 1), slice(oy, ey), slice(ox, ex)))[0].astype(float) / 255, 1.0)
-    oy -= Y0 * 4; ox -= X0 * 4
+    oy, ox = int((allp[:, 0].min() + Y0 - 40) * SC), int((allp[:, 1].min() + X0 - 40) * SC)
+    ey, ex = int((allp[:, 0].max() + Y0 + 40) * SC), int((allp[:, 1].max() + X0 + 40) * SC)
+    r1 = ndi.gaussian_filter(data.read(rec1, (slice(SC * z3, SC * z3 + 1), slice(oy, ey), slice(ox, ex)))[0].astype(float) / 255, 1.0)
+    oy -= Y0 * SC; ox -= X0 * SC
     P = np.concatenate([l["yx"] for l in L]); Wh = np.concatenate([l["w"] for l in L]); Lid = np.concatenate([[k] * len(l["w"]) for k, l in enumerate(L)])
     tree = cKDTree(P)
     # seed densely near human ladders so generated steps overlap them

@@ -6,9 +6,12 @@ exp/e43_eval_gold.py (PCU gold ladders) does, but keeps the per-ladder slip coun
   - a paired bootstrap CI of the difference against a reference fit,
   - a selection-free estimate for a weight sweep: choose the weight on a random half of the ladders, report
     the chosen fit on the other half (200 splits).
-Usage:
-  python exp/e31b_bootstrap.py human A2=pcu-fit-auto B2=pcu-fit-b B=pcu-fit-b B3w10=pcu-fit-b3 ... --ref A2 --sweep B4w4,B3w10,B4w20,B3w40 --out runs/e31b_p4.json
-  LADDERS=runs/gold0826_heldout8.json Z0=8500 Z1=9500 python exp/e31b_bootstrap.py gold A0=pcu-0826 ... --ref A0 --out runs/e31b_0826.json"""
+Each fit is given as NAME=FILE.npz (a grid file, e.g. from release v1.1) or NAME=RUN (our Kaggle layout,
+runs/kaggle/RUN/grids_NAME.npz). Usage:
+  python exp/e31b_bootstrap.py human A2=grids_Paris4_A2.npz B3w10=grids_Paris4_B3w10.npz --ref A2 --out out.json
+  python exp/e31b_bootstrap.py human A2=pcu-fit-auto B2=pcu-fit-b B3w10=pcu-fit-b3 ... --ref A2 --sweep B4w4,B3w10,B4w20,B3w40 --out runs/e31b_p4.json
+  LADDERS=data/gold/gold0826_heldout8.json Z0=8500 Z1=9500 python exp/e31b_bootstrap.py gold A0=grids_PHerc0826_A0.npz B1w20=grids_PHerc0826_B1w20.npz --ref A0 --out out.json
+The Paris 4 human ladders are fetched from the public bucket (z2 band 8400-9400 by default; Z0/Z1 override)."""
 import sys, os, json, glob, argparse
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import numpy as np
@@ -85,7 +88,7 @@ def score(f):
 res = {}
 for spec in a.fits:
     name, run = spec.split("=")
-    S, T, far = score(f"runs/kaggle/{run}/grids_{name}.npz")
+    S, T, far = score(run if run.endswith(".npz") else f"runs/kaggle/{run}/grids_{name}.npz")
     res[name] = dict(slips=int(S.sum()), pairs=int(T.sum()), rate=float(S.sum() / max(T.sum(), 1)), unassigned=far, S=S.tolist(), T=T.tolist())
     print(f"{name}: {S.sum()}/{T.sum()} = {S.sum()/max(T.sum(),1):.4f} per wrap; unassigned {far}", flush=True)
 
@@ -97,6 +100,8 @@ for name in res:
     r = np.array([rate(name, b) for b in B])
     out[name] = dict(slips=res[name]["slips"], pairs=res[name]["pairs"], rate=res[name]["rate"], unassigned=res[name]["unassigned"],
                      ci95=[float(np.percentile(r, 2.5)), float(np.percentile(r, 97.5))])
+    if a.ref and a.ref not in res:
+        sys.exit(f"--ref {a.ref} is not among the fits given ({', '.join(res)})")
     if a.ref and name != a.ref:
         d = np.array([rate(name, b) - rate(a.ref, b) for b in B])
         out[name]["diff_vs_ref"] = dict(ref=a.ref, mean=float(res[name]["rate"] - res[a.ref]["rate"]),

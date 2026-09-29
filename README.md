@@ -38,9 +38,9 @@ Reproduce the ink table from public data in one command (`python eval_trace.py`,
 | | |
 |---|---|
 | ![precision vs coverage](docs/fig/pcu_precision_coverage.png) | ![PHerc1447 site](docs/fig/pherc1447_site.jpg) |
-| PCU certificate on Paris 4: precision of certified wrap counts against the 1,502 human pairs as the agreement tolerance is swept; the star is the operating point used everywhere (tolerances 0.25 / 0.30), the square is the local phase count alone. | Positive control at the organisers' PHerc1447 ink site (circle = 3 mm disk at the reported coordinates; 1.04 cm crops at 8.64 um): CT mid layer, TRACE sA, KLAVIS. Every public detector responds only weakly, and the ring at the right is a void edge, not ink. |
+| PCU certificate on Paris 4: precision of certified wrap counts against the 1,502 human pairs as the agreement tolerance is swept; the star is the operating point used everywhere (tolerances 0.25 / 0.30), the square is the local phase count alone. | Positive control at the organisers' PHerc1447 ink site (circle = 3 mm disk at the reported coordinates; 1.04 cm crops at 8.64 um): CT mid layer and two of the detectors, TRACE sA and KLAVIS. Both respond only weakly inside the circle (the full 20-setting table for all seven models is in `results/e90_pherc1447_results.json`); the bright ring at the right is a void edge, not ink. |
 | ![neighbour control](docs/fig/vetting_neighbour_control.jpg) | ![title box](docs/fig/paris4_titlebox_control.jpg) |
-| Why hotspots must be vetted: the text-range response on PHerc0826 w073 (right half) is present on the neighbouring wraps w072 and w074 in the same angular sector, so it is regional texture, not one sheet's ink. | Paris 4 title box rendered at 9.6 um: two TRACE v1 maps (sA, sB) and the CT mid layer. The known four-line column at the top passes (positive control); the blank stretch below shows nothing to any detector. |
+| Why hotspots must be vetted: the text-range response on PHerc0826 w073 (right half) is present strongly on the wrap inside it (w072) and weakly on the wrap outside (w074) in the same angular sector, so it is regional texture, not one sheet's ink. | Paris 4 title box rendered at 9.6 um: two TRACE v1 maps (sA and sB; panel order not recorded) and the CT mid layer. The known final column at the top (three full lines visible plus the cropped top row) passes as a positive control; the stretch below shows no line structure to either checkpoint. |
 
 ## Setup
 
@@ -50,7 +50,7 @@ Python 3.12. Install `torch` for your platform, then:
 pip install -r requirements.txt
 git clone -b merge-ink-pipelines https://github.com/ScrollPrize/villa.git ext/villa-ink && git -C ext/villa-ink checkout 3ea17f5   # koine_machines (ink models)
 git clone https://github.com/ScrollPrize/villa.git ext/villa && git -C ext/villa checkout 6bbe6e2                                   # vesuvius.image_proc, fit_spiral
-mkdir -p data/cache/checkpoints && curl -L -o data/cache/checkpoints/v3B.pth https://github.com/Jashann/vesuvius-scrolling/releases/download/v1.0/v3B_best.pth
+mkdir -p data/cache/checkpoints && for m in v3B sA sB; do curl -L -o data/cache/checkpoints/$m.pth https://github.com/Jashann/vesuvius-scrolling/releases/download/v1.0/${m}_best.pth; done
 ```
 
 All scroll data is read straight from the Vesuvius Challenge open-data bucket through `pcu.data` (chunk cache in `$PCU_CACHE`, default `data/cache`).
@@ -72,7 +72,7 @@ or from Python: `from pcu.trace_infer import load_model, predict` (`predict(mode
 **Certified winding constraints** (Paris 4, Lasagna L2 predictions from the bucket):
 
 ```bash
-python exp/e11_generate.py <z_L3> 48            # one slice -> runs/constraints/pcu_z2_<z>.json
+python exp/e11_generate.py <z_L3> 48            # one slice -> runs/constraints/pcu_z2_<2*z_L3>.json (level-2 coordinates)
 OUT=runs/constraints python exp/e13_band.py <z_lo> <z_hi> 2   # a z-band, gold and silver tiers
 python exp/e9_certificate.py                     # precision / coverage on the human ladders
 python exp/e9b_negative.py                       # the same on 2- and 3-wrap pairs (negative set)
@@ -85,21 +85,28 @@ The merged file loads into `fit_spiral.py` as an extra relative-winding document
 input_use_pcl_relative=True,            # our file as relative_windings.json (integer collection keys,
                                         # "vc_pointcollections_json_version": "1")
 input_use_verified_patches=False, input_use_winding_inference=False,   # fully automatic
-sample_count_unattached_pcls_per_step=840,                             # 10x the default
-loss_weight_unattached_pcl_radius=10.0, loss_weight_unattached_pcl_dt=10.0,
+sample_count_unattached_pcls_per_step=840,                             # 10x the default 84 (the fitter divides
+                                                                       # by the number of z blocks, so logs print 88)
+loss_weight_unattached_pcl_radius=10.0, loss_weight_unattached_pcl_dt=10.0,   # fit defaults are 2.0 / 4.0
 ```
 
-`kaggle/pcu-fit-auto/` (A2 baseline), `kaggle/pcu-fit-b/` (B2, default weight; B with verified patches) and `kaggle/pcu-fit-b4/` (weights 4/4 and 20/10) are the other runs of the sweep. Score any grid: `python exp/e31b_bootstrap.py human B3w10=<dir> --ref A2 --out out.json`.
+`kaggle/pcu-fit-auto/` (A2 baseline), `kaggle/pcu-fit-b/` (B2, default weight; B with verified patches), `kaggle/pcu-fit-ab/` (A, C) and `kaggle/pcu-fit-b4/` (weights 4/4 and 20/10) are the other runs of the sweep; `kaggle/pcu-0826*/` the PHerc0826 runs. Score any grids from release v1.1 (about 2 minutes each on a laptop):
+
+```bash
+python exp/e31b_bootstrap.py human A2=grids_Paris4_A2.npz B3w10=grids_Paris4_B3w10.npz --ref A2 --out p4.json
+LADDERS=data/gold/gold0826_heldout8.json Z0=8500 Z1=9500 python exp/e31b_bootstrap.py gold A0=grids_PHerc0826_A0.npz B1w20=grids_PHerc0826_B1w20.npz --ref A0 --out s0826.json
+```
 
 **Fit, render and survey a scroll with no published umbilicus:**
 
 ```bash
 python exp/e69_umb_band.py PHerc0813 11300 12300 umb_PHerc0813.json   # band umbilicus
-# kaggle/pcu-fit-new/template.py: spiral fit with CW/ACW pilots, then TRACE on every 3rd winding
-# (fill the SCROLL / Z0 / Z1 placeholders at the top of the template per job)
+# kaggle/pcu-fit-new/template.py: spiral fit with CW/ACW pilots, then TRACE on every 3rd winding.
+# Replace the __JOBS__ placeholder with a list of (name, scroll, tracks_timestamp, z0, z1) and upload the
+# umbilicus to the job's Kaggle dataset as umb_<scroll>.json
 ```
 
-**Vet a hotspot** (depth profile, then the neighbouring wraps in the same angular sector), on a fit grid from release v1.1:
+**Vet a hotspot** (depth profile, then the neighbouring wraps in the same angular sector), on a fit grid from release v1.1, with the sA/sB/v3B checkpoints from Setup:
 
 ```bash
 python exp/e73_vet.py PHerc0826 grids_PHerc0826_B1w20.npz w073 0.35 0.70 w072,w074 s0826w073
@@ -115,7 +122,7 @@ Scripts in `exp/` that load several checkpoints look for them under `runs/` and 
 - **No letters were read.** Surveys of about 600 windings across PHerc0826, 0125, 0211, 0191, 0257, 0358, 0813, 0800, 1447 and 1203 produced text-range hotspots that all failed the neighbouring-sheet control (regional texture of crushed papyrus), except one sheet-specific but unreadable patch on PHerc0826. At the organisers' PHerc1447 ink site every public detector responds only weakly (81st to 97th percentile of a 1 cm crop, best of 20 settings per model; the released model ranks highest), so one site cannot rank detectors.
 - **TRACE is a fine-tune selected on its held-out set.** About 8 runs, each evaluated about 8 times on the same four segments, with the layer order confirmed on them too. The v3 gain over v1 (0.01 to 0.02) is within that selection spread and is not claimed as real. Against sparse human labels on PHerc0139 w043 the fine-tunes score below the base model, and w043's neighbouring wraps are in the training set. The window statistic (p95) is a triage tool, not a text detector.
 - **The certificate test set contains only true one-wrap pairs**, so it cannot show the error that hurts a fit most (certifying "1" across a missed sheet); `exp/e9b_negative.py` measures that on 2- and 3-wrap pairs, and on PHerc0139 the rate is 5 to 8% of two-wrap pairs. The tolerances (0.25 / 0.30) were chosen on the same 1,502 pairs; the 20 half-split calibration (99.64%) is the only guard.
-- **Fit gains are single-seed runs** scored on 32 ladders in one band; the fit satisfies only about 45% of the constraint strips at its own tolerance. The PHerc0826 gain is measured against PCU's own ladders on held-out slices and the weight was chosen on that set (the selection-free number is the same, 36.4%, because w20 wins on 199 of 200 splits). The eligible-scroll fit remains far worse than Paris 4 (36% vs 9%).
+- **Fit gains are single-seed runs** scored on 32 ladders in one band; the fit satisfies only about 45% of the constraint strips at its own tolerance. The PHerc0826 gain is measured against PCU's own ladders on held-out slices and the weight was chosen on that set (the selection-free number is the same, 36.4%, because w20 wins on 199 of 200 splits); our outer shell alone changes nothing there (C0 49.5% vs A0 50.1%), so the reduction is the constraints. The eligible-scroll fit remains far worse than Paris 4 (36% vs 9%).
 - The whole-slice winding field is a diagnostic, not a replacement for the spiral fit (it jumps along sheets).
 
 ## Layout

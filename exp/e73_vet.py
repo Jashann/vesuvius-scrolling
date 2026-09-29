@@ -14,10 +14,13 @@ from vesuvius.image_proc.intensity.normalization import normalize_robust
 sc, gpath, W0, f0, f1, nb, TAG = sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5]), sys.argv[6], sys.argv[7]
 OUT = "runs/e73"; os.makedirs(OUT, exist_ok=True)
 dev = "cuda" if torch.cuda.is_available() else "cpu"
-CK = {"sA": "runs/kaggle/pcu-trace-train/sA_best.pth", "sB": "runs/kaggle/pcu-trace-train/sB_best.pth",
-      "v2A": "runs/modal_v2/v2A_best.pth"}
+CKDIR = os.path.join(os.environ.get("PCU_CACHE", "data/cache"), "checkpoints")  # see README "Setup" for the downloads
+CK = {"sA": f"{CKDIR}/sA.pth", "sB": f"{CKDIR}/sB.pth", "v3B": f"{CKDIR}/v3B.pth",
+      "v2A": "runs/modal_v2/v2A_best.pth"}  # v2A was not released; skipped unless present
 nets = {k: build_repo_training_model_bundle(torch.load(p, map_location="cpu", weights_only=False), p).model.to(dev).eval()
         for k, p in CK.items() if os.path.exists(p)}  # missing checkpoints are skipped
+if not nets:
+    sys.exit(f"no checkpoint found under {CKDIR} (expected sA.pth, sB.pth or v3B.pth from the GitHub release)")
 G = np.load(gpath)
 S = data.SCROLLS[sc]
 vol = data.open_array(S["vol"] + "/0"); surf = data.open_array(S["surf"] + "/0")
