@@ -25,15 +25,30 @@ PHerc0841 segments: `w00` (`20260220213127-w00`), `ag144` (`20260220214732-auto_
 
 ## 4. Results
 
-AUC against human labels on PHerc0841 and on PHerc0139 w043; w043 also against the organisers' 2.4 um map (the teacher signal). Released checkpoints only.
+AUC against human labels on PHerc0841 and on PHerc0139 w043; w043 also against the organisers' 2.4 um map (the teacher signal, from the training-time evaluation). Released checkpoints only. The human-label columns are the output of `python eval_trace.py` run on a fresh clone of this repository on 2026-09-28 (`results/eval_trace.log`, `results/trace_heldout_auc.json`); the two released ink_9um seeds and KLAVIS (domenicor046/ink9um-dense, dense9um-all7) are included as baselines.
 
-| Model | 0841 w00 | 0841 ag144 | 0841 ag174 | w043 vs 2.4 um map | w043 vs human labels |
+| Model | 0841 w00 | 0841 ag144 | 0841 ag174 | w043 vs human labels | w043 vs 2.4 um map |
 |---|---|---|---|---|---|
-| released ink_9um (seed 42, step 75000) | 0.747 | 0.736 | 0.705 | 0.782 | 0.82 |
-| TRACE sA (step 3000) | 0.853 | 0.850 | 0.803 | 0.895 | 0.789 |
-| TRACE sB (step 4500) | 0.857 | 0.839 | 0.817 | 0.898 | 0.764 |
-| TRACE v3A (step 4000) | 0.866 | 0.860 | 0.832 | 0.886 | 0.745 |
-| TRACE v3B (step 5000) | **0.868** | **0.862** | **0.837** | 0.899 | 0.760 |
+| released ink_9um, seed 42 (step 75000) | 0.746 | 0.736 | 0.705 | 0.825 | 0.782 |
+| released ink_9um, seed 43 (step 75000) | 0.772 | 0.709 | 0.749 | 0.830 | |
+| KLAVIS dense9um-all7 | 0.799 | 0.807 | 0.762 | **0.851** | |
+| TRACE sA (step 3000) | 0.853 | 0.850 | 0.803 | 0.789 | 0.895 |
+| TRACE sB (step 4500) | 0.857 | 0.839 | 0.817 | 0.764 | 0.898 |
+| TRACE v3A (step 4000) | 0.866 | 0.860 | 0.832 | 0.745 | 0.886 |
+| TRACE v3B (step 5000) | **0.868** | **0.862** | **0.837** | 0.760 | 0.899 |
+
+The two ink_9um seeds differ by up to 0.04 on one segment, which is the run-to-run yardstick; KLAVIS gains 0.04 to 0.07 over seed 42 on PHerc0841 and is the best model on w043's human labels; TRACE gains 0.10 to 0.13 on PHerc0841 and loses 0.04 to 0.08 on w043.
+
+**Uncertainty.** `exp/eval_ci.py` computes block-bootstrap intervals from the saved maps (1 cm blocks; only 5 to 10 labelled blocks per segment, so the intervals are wide; point values differ slightly from the table because the maps are stored at 4x downsampling). Paired difference against seed 42 on the same block resamples, 95% intervals (`results/trace_heldout_auc_ci.json`):
+
+| Model | 0841 w00 | 0841 ag144 | 0841 ag174 | w043 (human labels) |
+|---|---|---|---|---|
+| seed 43 | +0.02 (-0.04 to +0.07) | -0.03 (-0.07 to +0.02) | +0.04 (+0.01 to +0.08) | +0.01 (-0.08 to +0.04) |
+| KLAVIS | +0.04 (+0.01 to +0.07) | +0.07 (+0.03 to +0.12) | +0.06 (-0.00 to +0.13) | +0.03 (-0.04 to +0.07) |
+| TRACE sB | +0.09 (+0.05 to +0.13) | +0.10 (+0.05 to +0.16) | +0.09 (+0.02 to +0.17) | -0.06 (-0.16 to +0.00) |
+| TRACE v3B | +0.10 (+0.06 to +0.15) | +0.12 (+0.05 to +0.19) | +0.11 (+0.06 to +0.18) | -0.06 (-0.18 to +0.02) |
+
+Every TRACE checkpoint's gain on the three PHerc0841 segments excludes zero; the w043 loss does not quite. Figure: `docs/fig/pherc0841_w00_maps.jpg` (CT, human labels, seed 42, KLAVIS, v3B on w00).
 
 Two readings. On PHerc0841 (dense human labels, a scroll none of the models saw) every fine-tune beats the base model by 0.10 to 0.13. On w043 the fine-tunes track the teacher map (0.90) but score *below* the base model against the sparse human labels there: they inherit the teacher's errors where it disagrees with the annotators. Pixels are spatially correlated, so the block bootstrap above is the honest uncertainty; the evidence is that three independent segments move in the same direction by two to three times the seed-to-seed spread. How the PHerc0841 labels were drawn (over CT, or over a 2.4 um prediction) is not documented here; if over predictions, part of the gain is agreement with the teacher.
 
