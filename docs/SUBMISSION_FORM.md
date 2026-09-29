@@ -5,7 +5,7 @@ Deadline: 11:59pm Pacific, 30 September 2026.
 
 **Title:** Certified automatic winding constraints (99.6% precision) and TRACE, an ink detector trained on the eligible-protocol scans (+0.10-0.13 AUC held out)
 
-**Team:** Jashanjot Singh Gill, Nhat Nam Tran
+**Team:** Jashanjot Singh Gill (github.com/Jashann), Nhat Nam Tran (github.com/nnm2602)
 
 **Repository:** https://github.com/Jashann/vesuvius-scrolling (MIT; weights and derived data CC BY-NC-SA 4.0, attached to the GitHub release)
 

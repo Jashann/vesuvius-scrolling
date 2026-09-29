@@ -1,6 +1,6 @@
 # vesuvius-scrolling
 
-Tools for the Vesuvius Challenge built by Jashanjot Singh Gill and Nhat Nam Tran (September 2026). Two contributions:
+Tools for the Vesuvius Challenge built by Jashanjot Singh Gill ([@Jashann](https://github.com/Jashann)) and Nhat Nam Tran ([@nnm2602](https://github.com/nnm2602)), September 2026. Two contributions:
 
 1. **PCU: certified automatic winding constraints.** Lasagna's `cos` channel is treated as a wrapped winding phase; wrap counts between two points are measured three independent ways and certified only when all three agree. On PHerc. Paris 4 the certified counts are **99.62% correct at 70% coverage** against all 1,443 human adjacent-wrap pairs (100% below 173 um wrap spacing). Fed to the team's spiral fitter as relative-winding constraints they cut winding slips per wrap from **20.3% to 9.3%** on Paris 4 (fully automatic fit, held-out human ladders) and from **50.1% to 36.4%** on the eligible scroll PHerc0826 (held-out gold ladders). Details: [`docs/PCU_REPORT.md`](docs/PCU_REPORT.md).
 2. **TRACE: an ink detector trained on the eligible-protocol scans.** `ink_9um` fine-tuned on the team's real 9.362 um surface volumes (PHerc0139, PHerc0814) with the team's 2.4 um ink predictions as soft targets, then extended (v3) with the 8.64 um and 9.362 um fragment scans (PHerc0009B, PHerc0343P, PHerc0500P2). On the held-out scroll PHerc0841 (human labels, never trained on) it raises AUC from **0.71-0.75 (released ink_9um) to 0.84-0.88**. Details: [`docs/TRACE.md`](docs/TRACE.md).
