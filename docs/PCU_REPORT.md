@@ -8,7 +8,7 @@ consumes. On all 1,502 human adjacent-wrap pairs of PHerc. Paris 4 (63 slices), 
 **99.62% correct at 70% coverage** (4 errors; base rate of the best single measurement 95.6%; 95%
 Wilson lower bound 99.0%), **100% correct in the densest bands** (wrap spacing under 173 um); the
 gold tier of automatically generated steps is **942 / 942** against human ladders (lower bound 99.6%),
-and the precision holds on held-out calibration splits (99.64%). In the organisers' spiral fitter the
+and the precision holds on held-out calibration splits (99.7%). In the organisers' spiral fitter the
 constraints cut winding slips per wrap from 20.3% to 9.3% on Paris 4 (held-out human ladders, ladder-level
 bootstrap CI 6.2 to 12.7%, selection-free 10.2%) and from 50.1% to 36.3% on the eligible scroll PHerc0826
 measured against PCU's own gold ladders on held-out slices (section 2b).
